@@ -143,3 +143,58 @@ begin
     -- Connect carry out to INST2 display
     INST2 <= carry_display;
 end Structural;
+
+
+
+----
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_VECTOR.ALL;
+
+entity Lab2_PartD_Top is
+    Port (
+        SW    : in  STD_LOGIC_VECTOR(7 downto 0);  -- Switches for inputs
+        INST1 : out STD_LOGIC_VECTOR(6 downto 0); -- 7-segment display 1 (7 bits)
+        INST2 : out STD_LOGIC_VECTOR(6 downto 0)  -- 7-segment display 2 (7 bits)
+    );
+end Lab2_PartD_Top;
+
+architecture Structural of Lab2_PartD_Top is
+    -- Declare the Full Adder Component
+    component full_adder_4bit
+        Port (
+            A    : in  STD_LOGIC_VECTOR (3 downto 0);
+            B    : in  STD_LOGIC_VECTOR (3 downto 0);
+            Cin  : in  STD_LOGIC;
+            Sum  : out STD_LOGIC_VECTOR (3 downto 0);
+            Cout : out STD_LOGIC
+        );
+    end component;
+
+    -- Internal Signals
+    signal hex_A, hex_B, sum_result : STD_LOGIC_VECTOR(3 downto 0);
+    signal carry_out : STD_LOGIC;
+    signal carry_display : STD_LOGIC_VECTOR(3 downto 0);
+
+begin
+    -- Assign switches to operands
+    hex_A <= SW(3 downto 0);  -- Lower 4 switches control Operand A
+    hex_B <= SW(7 downto 4);  -- Upper 4 switches control Operand B
+
+    -- Instantiate the 4-bit Full Adder
+    FA4: full_adder_4bit port map (
+        A    => hex_A,
+        B    => hex_B,
+        Cin  => '0',  -- Carry-in is set to '0'
+        Sum  => sum_result,
+        Cout => carry_out
+    );
+
+    -- Concatenation for Carry Display
+    carry_display <= "000" & carry_out;
+
+    -- Fix: Zero-Pad Outputs to 7-bits
+    INST1 <= "000" & sum_result;  -- Convert 4-bit sum to 7-bit
+    INST2 <= "000" & carry_display;  -- Convert 4-bit carry to 7-bit
+
+end Structural;
